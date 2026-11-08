@@ -1,5 +1,8 @@
 data/
-
+data_full
 data_lite/
 *.csv
 .DS_Store
+.venv/s
+
+_pycache__/
