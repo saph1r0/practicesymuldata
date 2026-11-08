@@ -20,7 +20,7 @@ Con la misma semilla (por defecto 2026) se genera exactamente la misma data. Par
 python evaluar.py --entrega salidas/entrega.csv --data data
 ```
 
-Formato: `id_empresa, prob_factoring, monto_esperado, priorizado` (una fila por id de `ids_evaluacion.csv`).
+Formato: `id_empresa, prob_factoring, monto_esperado, habilitar, priorizado` (una fila por id de `ids_evaluacion.csv`).
 
 ## Reglas
 

@@ -241,8 +241,15 @@ def generar(escala, salida, seed):
     hist_bcp = hist & cliente & (rng.random(N) < 0.62)
     hist_otro = hist & ~hist_bcp
     cliente = cliente | hist_bcp
-    zt = (z + 1.7 * hist_bcp + 0.6 * hist_otro + 0.8 * cliente + 0.35 * (zona == "LIMA")
-          + 0.5 * m_agro - 2.3 + rng.normal(0, 1.5, N))
+    # ---------------- LEADS (grupo A): ~10% de clientes Pyme con oferta precalificada ----------------
+    # El banco los eligio con una REGLA ANTIGUA: tamano, historial BCP y volumen; NO mira plazo, rubro ni estres.
+    # Por eso hay empresas con alto potencial fuera de la lista (grupo B: "habilitar mas").
+    pyme_cli = cliente & np.isin(segn, ["MIPE", "PYME"])
+    regla = 1.5 * hist_bcp + 0.35 * np.log1p(vol / 1e4) + 0.4 * (segn == "PYME") + rng.normal(0, 1.0, N)
+    corte = np.quantile(regla[pyme_cli], 0.90)
+    lead = pyme_cli & (regla >= corte)
+    zt = (z + 1.7 * hist_bcp + 0.6 * hist_otro + 0.8 * cliente + 1.3 * lead + 0.35 * (zona == "LIMA")
+          + 0.5 * m_agro - 2.5 + rng.normal(0, 1.5, N))
     target = (rng.random(N) < sigmoid(zt)) & es_prov
     n_ops_t = np.where(target, 1 + rng.poisson(0.8 + 2.0 * hist_bcp), 0)
     monto_target = n_ops_t * mean_inv * rng.uniform(1, 4, N) * np.exp(0.15 * stress)
@@ -335,6 +342,9 @@ def generar(escala, salida, seed):
         "flag_web": (rng.random(N) < np.where(np.isin(segn, ["MIPE"]), .1, .5)).astype(int),
         "fecha_actualizacion": f_act,
         "origen_registro": rng.choice(["SUNAT", "CRM", "CAMPANA_2023", "REFERIDO"], N, p=[.5, .3, .15, .05]),
+        "flag_lead_factoring": np.where(lead, rng.choice(["1", "S"], N, p=[.9, .1]), rng.choice(["0", ""], N, p=[.9, .1])),
+        "fecha_habilitacion_lead": np.where(lead, (np.datetime64("2025-01-01") + rng.integers(0, 181, N).astype("timedelta64[D]")).astype(str), ""),
+        "monto_oferta_factoring": np.where(lead, (mean_inv * rng.uniform(2, 6, N)).round(-2), np.nan),
     })
     # duplicados: misma empresa con registro mas antiguo (hay que quedarse con el mas reciente)
     nd = int(0.015 * N)
@@ -614,11 +624,14 @@ def generar(escala, salida, seed):
     # ---------------- set de evaluacion y clave ----------------
     tid = emp_id(ids[test])
     pd.DataFrame({"id_empresa": tid}).to_csv(os.path.join(salida, "ids_evaluacion.csv"), index=False)
-    clave = pd.DataFrame({"id_empresa": tid, "zona": zona[test], "segmento": segn[test], "sector": secn[test]})
+    grupo_ab = np.where(lead, "A_LEAD", np.where(pyme_cli, "B_PYME_SIN_LEAD", "C_RESTO"))
+    clave = pd.DataFrame({"id_empresa": tid, "zona": zona[test], "segmento": segn[test], "sector": secn[test],
+                          "lead": lead[test].astype(int), "grupo": grupo_ab[test]})
     clave["target"] = clave.id_empresa.map(agg).notna().astype(int)
     clave["monto_target"] = clave.id_empresa.map(agg).fillna(0.0).round(2)
     clave.to_csv(os.path.join(salida, "_clave_oculta", "clave.csv"), index=False)
     print(f"\nListo. Test: {len(tid):,} empresas | tasa target test: {clave.target.mean():.2%}")
+    print(clave.groupby("grupo").agg(n=("target", "size"), tasa=("target", "mean"), monto_medio=("monto_target", "mean")).round(3).to_string())
 
 
 if __name__ == "__main__":
