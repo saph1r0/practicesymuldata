@@ -2,9 +2,9 @@
 Todo script importa de aqui las rutas y la conexion: si cambia una ruta, se cambia en un solo lugar."""
 import os
 import time
-import resource
 from contextlib import contextmanager
 import duckdb
+import psutil
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(RAIZ, "data")          # CSV originales (nunca se modifican)
@@ -43,5 +43,5 @@ def conectar(memoria="4GB"):
 def cronometro(nombre):
     t = time.time()
     yield
-    rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1e6
-    print(f"[{nombre}] {time.time() - t:,.1f} s | memoria maxima del proceso: {rss:.2f} GB")
+    rss = psutil.Process().memory_info().rss / 1e9
+    print(f"[{nombre}] {time.time() - t:,.1f} s | memoria actual del proceso: {rss:.2f} GB")

@@ -2,10 +2,11 @@
 Objetivo: saber si la data cabe en memoria y elegir la herramienta con numeros, no con intuicion."""
 import os
 import pandas as pd
+import psutil
 from comun import DATA, csv, conectar, cronometro
 
 # 1) RAM de la maquina
-ram = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1e9
+ram = psutil.virtual_memory().total / 1e9
 print(f"RAM total de esta maquina: {ram:.1f} GB\n")
 
 # 2) Tamano en disco de cada archivo

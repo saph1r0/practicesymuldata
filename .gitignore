@@ -1,8 +1,12 @@
 data/
-data_full
+data_full/
 data_lite/
 *.csv
 .DS_Store
-.venv/s
-
-_pycache__/
+.venv/
+.venv-*/
+__pycache__/
+*.py[cod]
+limpio/
+features/
+salidas/
