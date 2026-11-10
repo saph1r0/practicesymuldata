@@ -1,26 +1,24 @@
 # Simulacro DataFest BCP – Caso Factoring por Rubros
 
-La guía completa (enunciado, diccionario, plan de 10 h, trampas y pitch) está en el doc "Simulacro DataFest BCP – Caso Factoring por Rubros".
+Para ejecutar el proyecto en **Windows, macOS o Linux**, sigue el
+[README principal](../README.md). Usa `data/` en la raíz del repositorio para
+generar los datos y ejecutar los pasos; no necesitas duplicarlos en esta carpeta.
 
-## Inicio rápido
+## Datos y evaluación
 
-```bash
-pip install duckdb lightgbm pandas scikit-learn pyarrow
-# Data del concurso: ~8.9M filas, 210 columnas, ~1.8 GB. Unos 3 min y hasta 4.7 GB de RAM.
-python generar_datafest_sim.py --escala 1.0 --salida data
-# Versión de práctica: ~0.9M filas, 20 s
-python generar_datafest_sim.py --escala 0.1 --salida data_lite
-```
-
-Con la misma semilla (por defecto 2026) se genera exactamente la misma data. Para un segundo intento: `--seed 7`.
-
-## Evaluar una entrega
+Desde la raíz del repositorio, con el entorno virtual activado:
 
 ```bash
-python evaluar.py --entrega salidas/entrega.csv --data data
+python simulacro_datafest_codigo/generar_datafest_sim.py --escala 0.1 --salida data
+python src/run_all.py pyme
+python src/evaluar.py --entrega salidas/entrega_pyme.csv --data data
 ```
 
-Formato: `id_empresa, prob_factoring, monto_esperado, habilitar, priorizado` (una fila por id de `ids_evaluacion.csv`).
+Usa `--escala 1.0` para la data completa: aproximadamente 8.9 millones de filas.
+Con la misma semilla (por defecto 2026) se genera la misma data. Para otro intento usa `--seed 7`.
+
+Formato de entrega: `id_empresa, prob_factoring, monto_esperado, habilitar, priorizado`
+(una fila por id de `ids_evaluacion.csv`).
 
 ## Reglas
 
