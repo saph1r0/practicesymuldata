@@ -22,5 +22,5 @@ Formato de entrega: `id_empresa, prob_factoring, monto_esperado, habilitar, prio
 
 ## Reglas
 
-- Nadie abre `data/_clave_oculta/` ni `solucion_referencia.py` hasta terminar las 10 horas.
+- Nadie abre `data/_clave_oculta/` ni `solucion_referencia.py` hasta terminar la práctica.
 - Solo VS Code + GitHub Copilot Chat. Repo en GitHub con una rama por integrante y pull requests.
